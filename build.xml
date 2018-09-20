@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="compilation tetris " default="dist" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant">
+<property name="src.dir" value="src" ></property>
+<property name="obj.dir" value="bin" ></property>
+<property name="libs.dir" value="libs"></property>
+<property name="main-class" value="fr.ubo.tetris.Tetris"></property>
+<property name="compile.classpath" value="${basedir}/lib/commons-lang3-3.5.jar"></property>
+<property name="version" value="1"></property>
+<property name="results.dir" value="${basedir}/test1"></property>
+<property name="doc" value="${basedir}/javadoc"/>
+<target name="retrieve" >
+<ivy:retrieve sync="true" type="jar"/>
+<ivy:settings>
+
+</ivy:settings>
+<ivy:resolve>
+</ivy:resolve>
+</target>
+<target name="clean"> 
+<echo message="Suppression des fichiers issus de la compilation " />
+<delete dir="${basedir}/bin" />
+<delete dir="${basedir}/lib" />
+<mkdir dir="${basedir}/lib"></mkdir>
+
+</target>
+
+<target name="compile-test" > 
+
+<javac srcdir="${basedir}/test" destdir="${obj.dir}"  executable="${javac.version}">
+<classpath >
+	<pathelement location="${basedir}/lib/commons-lang3-3.5.jar"/> 
+    <pathelement location="${basedir}/lib/junit-4.12.jar"/> 
+     <pathelement location="${basedir}/lib/hamcrest-core-1.3.jar"/> 
+      <pathelement location="${obj.dir}"/>
+	</classpath>
+
+</javac>
+
+</target>
+
+<target name="test" depends="compile-test">   
+	
+    
+	
+  <junit  fork="yes" printsummary="withOutAndErr"  haltonfailure="no">   
+	<!-- Project classpath, must include junit.jar -->
+	<classpath >
+	<pathelement location="${basedir}/lib/commons-lang3-3.5.jar"/> 
+    <pathelement location="${basedir}/lib/junit-4.12.jar"/> 
+     <pathelement location="${basedir}/lib/hamcrest-core-1.3.jar"/> 
+     <pathelement location="${obj.dir}"/> 
+	</classpath>
+		
+	<!-- test class -->
+	<classpath location="fr.ubo.tetris.Tetris" />
+		
+  <formatter type="plain"/>
+  <formatter type="xml"/>
+  
+<test name="fr.ubo.tetris.TestShape" todir="${results.dir}" />
+		
+  </junit>
+
+
+</target>
+<target name="compile" depends="retrieve"> 
+<mkdir dir="${basedir}/bin"></mkdir>
+
+    <javac srcdir="${src.dir}" destdir="${obj.dir}" classpath="${compile.classpath}" executable="${javac.version}"/>
+<!--  ou 
+
+<classpath path="${basedir}/lib/commons-lang3-3.5.jar"></classpath>
+
+ -->
+
+</target>
+<target name="dist" depends="clean,compile">
+      <manifest file="${obj.dir}/Manifest.ml">
+
+<attribute name="main-class" value="${main-class}" />
+<attribute name="implementation-version" value="${version}" />
+<attribute name="build-by" value ="karim"></attribute>
+<attribute name="class-path" value="${compile.classpath}"></attribute>
+      </manifest>
+      
+<jar jarfile="Tetris.jar" basedir="${obj.dir}"  manifest="${obj.dir}/Manifest.ml">
+
+</jar>
+
+</target>
+
+<target name="test-reports" depends="test">
+<delete dir="${basedir}/rapports"></delete>  
+<mkdir dir="${basedir}/rapports"></mkdir>  
+<junitreport todir="${basedir}/rapports">
+         <fileset dir="${basedir}/test1">
+             <include name="TEST*.xml"/>
+         </fileset>
+       <report format="frames" todir="${basedir}/rapports"/>
+       	    	
+        </junitreport>
+        
+        
+</target>
+
+<target name="javadoc" depends="compile">
+
+<delete dir="${doc}" />
+<mkdir dir="${doc}"></mkdir>
+<javadoc sourcepath="${basedir}/src" destdir="${doc}"/>
+
+</target>
+
+<target name="all" depends="clean,compile,test,javadoc" >
+
+</target>
+
+</project>
